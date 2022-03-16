@@ -12,17 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from fastapi import FastAPI
 import os
+# import time
+
+from google.cloud import workflows_v1beta
+from google.cloud.workflows import executions_v1beta
+from google.cloud.workflows.executions_v1beta.types import executions
+
+app = FastAPI()
 
 
-def execute_workflow(project, location, workflow):
+@app.get("/")
+async def execute_workflow():
+    
+    project = os.environ.get('GOOGLE_CLOUD_PROJECT')
+    location = os.environ.get('GOOGLE_CLOUD_LOCATION')
+    workflow = os.environ.get('WORKFLOW_NAME')
     """Execute a workflow and print the execution results."""
     # [START workflows_api_quickstart]
-    import time
-
-    from google.cloud import workflows_v1beta
-    from google.cloud.workflows import executions_v1beta
-    from google.cloud.workflows.executions_v1beta.types import executions
 
     # TODO(developer): Uncomment these lines and replace with your values.
     # project = 'my-project-id'
@@ -61,10 +69,3 @@ def execute_workflow(project, location, workflow):
     #         print(execution.result)
     #         return execution.result
     # # [END workflows_api_quickstart]
-
-
-if __name__ == "__main__":
-    project = os.environ.get('GOOGLE_CLOUD_PROJECT')
-    location = os.environ.get('GOOGLE_CLOUD_LOCATION')
-    workflow = os.environ.get('WORKFLOW_NAME')
-    execute_workflow(project=project, location=location, workflow=workflow)
