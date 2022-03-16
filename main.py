@@ -67,4 +67,4 @@ if __name__ == "__main__":
     project = os.environ.get('GOOGLE_CLOUD_PROJECT')
     location = os.environ.get('GOOGLE_CLOUD_LOCATION')
     workflow = os.environ.get('WORKFLOW_NAME')
-    execute_workflow(project=project)
+    execute_workflow(project=project, location=location, workflow=workflow)
