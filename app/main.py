@@ -23,7 +23,7 @@ from google.cloud.workflows.executions_v1beta.types import executions
 app = FastAPI()
 
 
-@app.get("/")
+@app.post("/")
 async def execute_workflow():
     
     project = os.environ.get('GOOGLE_CLOUD_PROJECT')
