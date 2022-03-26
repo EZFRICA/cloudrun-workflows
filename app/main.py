@@ -18,7 +18,7 @@ import json
 
 from google.cloud import workflows_v1beta
 from google.cloud.workflows import executions_v1beta
-from google.cloud.workflows.executions_v1.types import Execution
+from google.cloud.workflows.executions_v1beta.types import Execution
 
 app = FastAPI()
 
@@ -32,7 +32,8 @@ async def execute_workflow(event_request: Request):
     
     source = event_request.headers.get('ce-subject')
     tab_element_source = source.split("/")
-    argument = {"serviceName": tab_element_source[-1]}
+    workflows_argument = {"serviceName": tab_element_source[-1]}
+    print(workflows_argument)
     print(tab_element_source[-1])
     """Execute a workflow and print the execution results."""
     # [START workflows_api_quickstart]
@@ -42,8 +43,8 @@ async def execute_workflow(event_request: Request):
     # location = 'us-central1'
     # workflow = 'myFirstWorkflow'
 
-    if not (project and location and workflow):
-        raise HTTPException(status_code=500, detail="GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, WORKFLOW_NAME env var are required.")
+    # if not (project and location and workflow):
+    #     raise HTTPException(status_code=500, detail="GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, WORKFLOW_NAME env var are required.")
   
     # Set up API clients.
     execution_client = executions_v1beta.ExecutionsClient()
@@ -53,7 +54,7 @@ async def execute_workflow(event_request: Request):
     parent = workflows_client.workflow_path(project, location, workflow)
 
     # Execute the workflow.
-    execution = Execution(argument = json.dumps(argument))
+    execution = Execution(argument = json.dumps(workflows_argument))
     # response = execution_client.create_execution(request={"parent": parent})
     response = None
     try:
