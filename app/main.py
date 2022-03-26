@@ -12,26 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 import os
-import time
+import json
 
 from google.cloud import workflows_v1beta
 from google.cloud.workflows import executions_v1beta
-from google.cloud.workflows.executions_v1beta.types import executions
+from google.cloud.workflows.executions_v1.types import Execution
 
 app = FastAPI()
 
 
 @app.post("/")
-async def execute_workflow(request: Request):
+async def execute_workflow(event_request: Request):
     
     project = os.environ.get('GOOGLE_CLOUD_PROJECT')
     location = os.environ.get('GOOGLE_CLOUD_LOCATION')
     workflow = os.environ.get('WORKFLOW_NAME')
     
-    source = request.headers.get('ce-subject')
-    print(source)
+    source = event_request.headers.get('ce-subject')
+    tab_element_source = source.split("/")
+    argument = {"serviceName": tab_element_source[-1]}
+    print(tab_element_source[-1])
     """Execute a workflow and print the execution results."""
     # [START workflows_api_quickstart]
 
@@ -40,9 +42,9 @@ async def execute_workflow(request: Request):
     # location = 'us-central1'
     # workflow = 'myFirstWorkflow'
 
-    if not project:
-        raise Exception('GOOGLE_CLOUD_PROJECT env var is required.')
-
+    if not (project and location and workflow):
+        raise HTTPException(status_code=500, detail="GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, WORKFLOW_NAME env var are required.")
+  
     # Set up API clients.
     execution_client = executions_v1beta.ExecutionsClient()
     workflows_client = workflows_v1beta.WorkflowsClient()
@@ -51,24 +53,31 @@ async def execute_workflow(request: Request):
     parent = workflows_client.workflow_path(project, location, workflow)
 
     # Execute the workflow.
-    response = execution_client.create_execution(request={"parent": parent})
-    print(f"Created execution: {response.name}")
+    execution = Execution(argument = json.dumps(argument))
+    # response = execution_client.create_execution(request={"parent": parent})
+    
+    try:
+        response = execution_client.create_execution(parent=parent, execution=execution)
+    except:
+        raise HTTPException(status_code=500, detail="Error occurred when triggering workflow execution")
 
-    # Wait for execution to finish, then print results.
-    execution_finished = False
-    backoff_delay = 1  # Start wait with delay of 1 second
-    print('Poll every second for result...')
-    while (not execution_finished):
-        execution = execution_client.get_execution(request={"name": response.name})
-        execution_finished = execution.state != executions.Execution.State.ACTIVE
+    return "The workflow has been launched successfully"
 
-        # If we haven't seen the result yet, wait a second.
-        if not execution_finished:
-            print('- Waiting for results...')
-            time.sleep(backoff_delay)
-            backoff_delay *= 2  # Double the delay to provide exponential backoff.
-        else:
-            print(f'Execution finished with state: {execution.state.name}')
-            print(execution.result)
-            return execution.result
-    # [END workflows_api_quickstart]
+    # # Wait for execution to finish, then print results.
+    # execution_finished = False
+    # backoff_delay = 1  # Start wait with delay of 1 second
+    # print('Poll every second for result...')
+    # while (not execution_finished):
+    #     execution = execution_client.get_execution(request={"name": response.name})
+    #     execution_finished = execution.state != executions.Execution.State.ACTIVE
+
+    #     # If we haven't seen the result yet, wait a second.
+    #     if not execution_finished:
+    #         print('- Waiting for results...')
+    #         time.sleep(backoff_delay)
+    #         backoff_delay *= 2  # Double the delay to provide exponential backoff.
+    #     else:
+    #         print(f'Execution finished with state: {execution.state.name}')
+    #         print(execution.result)
+    #         return execution.result
+    # # [END workflows_api_quickstart]
