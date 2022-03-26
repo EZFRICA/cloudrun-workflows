@@ -56,11 +56,7 @@ async def execute_workflow(event_request: Request):
     # Execute the workflow.
     execution = Execution(argument = json.dumps(workflows_argument))
     # response = execution_client.create_execution(request={"parent": parent})
-    response = None
-    try:
-        response = execution_client.create_execution(parent=parent, execution=execution)
-    except:
-        raise HTTPException(status_code=500, detail="Error occurred when triggering workflow execution")
+    response = execution_client.create_execution(parent=parent, execution=execution)
 
     return "The workflow has been launched successfully", response.name
 
