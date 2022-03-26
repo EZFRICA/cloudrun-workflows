@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 import os
 import time
 
@@ -24,11 +24,14 @@ app = FastAPI()
 
 
 @app.post("/")
-async def execute_workflow():
+async def execute_workflow(request: Request):
     
     project = os.environ.get('GOOGLE_CLOUD_PROJECT')
     location = os.environ.get('GOOGLE_CLOUD_LOCATION')
     workflow = os.environ.get('WORKFLOW_NAME')
+    
+    source = request.headers.get('ce-subject')
+    print(source)
     """Execute a workflow and print the execution results."""
     # [START workflows_api_quickstart]
 
