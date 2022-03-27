@@ -33,19 +33,10 @@ async def execute_workflow(event_request: Request):
     source = event_request.headers.get('ce-subject')
     tab_element_source = source.split("/")
     workflows_argument = {"serviceName": tab_element_source[-1]}
-    print(workflows_argument)
-    print(tab_element_source[-1])
+    
     """Execute a workflow and print the execution results."""
     # [START workflows_api_quickstart]
 
-    # TODO(developer): Uncomment these lines and replace with your values.
-    # project = 'my-project-id'
-    # location = 'us-central1'
-    # workflow = 'myFirstWorkflow'
-
-    # if not (project and location and workflow):
-    #     raise HTTPException(status_code=500, detail="GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, WORKFLOW_NAME env var are required.")
-  
     # Set up API clients.
     execution_client = executions_v1beta.ExecutionsClient()
     workflows_client = workflows_v1beta.WorkflowsClient()
@@ -58,23 +49,4 @@ async def execute_workflow(event_request: Request):
     # response = execution_client.create_execution(request={"parent": parent})
     response = execution_client.create_execution(parent=parent, execution=execution)
 
-    return "The workflow has been launched successfully", response.name
-
-    # # Wait for execution to finish, then print results.
-    # execution_finished = False
-    # backoff_delay = 1  # Start wait with delay of 1 second
-    # print('Poll every second for result...')
-    # while (not execution_finished):
-    #     execution = execution_client.get_execution(request={"name": response.name})
-    #     execution_finished = execution.state != executions.Execution.State.ACTIVE
-
-    #     # If we haven't seen the result yet, wait a second.
-    #     if not execution_finished:
-    #         print('- Waiting for results...')
-    #         time.sleep(backoff_delay)
-    #         backoff_delay *= 2  # Double the delay to provide exponential backoff.
-    #     else:
-    #         print(f'Execution finished with state: {execution.state.name}')
-    #         print(execution.result)
-    #         return execution.result
-    # # [END workflows_api_quickstart]
+    return f"Created execution: {response.name}"
