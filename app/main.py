@@ -27,13 +27,13 @@ app = FastAPI()
 async def execute_workflow(event_request: Request):
     
     project = os.environ.get('GOOGLE_CLOUD_PROJECT')
-    location = os.environ.get('GOOGLE_CLOUD_LOCATION')
+    location = os.environ.get('WORKFLOW_LOCATION')
     workflow = os.environ.get('WORKFLOW_NAME')
     
     source = event_request.headers.get('ce-subject')
     tab_element_source = source.split("/")
     workflows_argument = {"serviceName": tab_element_source[-1]}
-    
+
     """Execute a workflow and print the execution results."""
     # [START workflows_api_quickstart]
 
@@ -49,4 +49,4 @@ async def execute_workflow(event_request: Request):
     # response = execution_client.create_execution(request={"parent": parent})
     response = execution_client.create_execution(parent=parent, execution=execution)
 
-    return f"Created execution: {response.name}"
+    return "The workflow has been launched successfully"
